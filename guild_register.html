@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация Гильдии Tacticus</title>
+    <!-- Подключаем официальный скрипт Telegram WebApp -->
+    <script src="https://telegram.org"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 400px;
+        }
+        h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: var(--tg-theme-hint-color, #707579);
+        }
+        p {
+            font-size: 14px;
+            line-height: 1.4;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        input {
+            padding: 12px;
+            border: 1px solid var(--tg-theme-hint-color, #ccc);
+            border-radius: 8px;
+            background-color: var(--tg-theme-secondary-bg-color, #f4f4f5);
+            color: var(--tg-theme-text-color, #000000);
+            font-size: 14px;
+        }
+        input:focus {
+            outline: 2px solid var(--tg-theme-button-color, #2481cc);
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background-color: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        button:active {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Регистрация Клана</h2>
+        <p>Вставьте ваш API-токен гильдии, сгенерированный на сайте <b>://tacticusgame.com</b> с правами <code>Guild read</code>.</p>
+
+        <div class="form-group">
+            <label for="token">Guild API Token</label>
+            <input type="text" id="token" placeholder="Вставьте длинный токен гильдии...">
+        </div>
+
+        <button id="submit-btn">Сохранить и привязать чат</button>
+    </div>
+
+    <script>
+        // Инициализация Telegram WebApp
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Расширяем на весь экран
+
+        // Получаем chat_id из параметров URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const chatId = urlParams.get('chat_id');
+
+        document.getElementById('submit-btn').addEventListener('click', () => {
+            const tokenValue = document.getElementById('token').value.trim();
+
+            if (!tokenValue) {
+                alert('Пожалуйста, введите токен!');
+                return;
+            }
+
+            if (!chatId) {
+                alert('Ошибка: ID чата не найден в ссылке.');
+                return;
+            }
+
+            // Формируем объект данных для отправки обратно в бота
+            const dataToSend = {
+                type: "guild",
+                chat_id: chatId,
+                token: tokenValue
+            };
+
+            // Отправляем данные боту (хэндлер dp.message(F.web_app_data) их поймает)
+            tg.sendData(JSON.stringify(dataToSend));
+
+            // Закрываем WebApp веб-страницу
+            tg.close();
+        });
+    </script>
+</body>
+</html>
