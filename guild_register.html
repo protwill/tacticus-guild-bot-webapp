@@ -83,40 +83,58 @@
     </div>
 
     <script>
-        // Инициализация Telegram WebApp
-        const tg = window.Telegram.WebApp;
-        tg.expand(); // Расширяем на весь экран
+        // Код запускается сразу, без ожидания DOMContentLoaded
+        try {
+            // Находим нашу кнопку по ID
+            const submitBtn = document.getElementById('submit-btn');
 
-        // Получаем chat_id из параметров URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const chatId = urlParams.get('chat_id');
+            submitBtn.addEventListener('click', () => {
+                try {
+                    // Проверяем наличие SDK Телеграма прямо в момент клика по кнопке
+                    if (!window.Telegram || !window.Telegram.WebApp) {
+                        alert('⚠️ Ошибка: Telegram WebApp SDK еще не загрузился. Пожалуйста, подождите 2 секунды и нажмите кнопку снова.');
+                        return;
+                    }
 
-        document.getElementById('submit-btn').addEventListener('click', () => {
-            const tokenValue = document.getElementById('token').value.trim();
+                    const tg = window.Telegram.WebApp;
+                    tg.expand(); // Расширяем шторку на всякий случай
 
-            if (!tokenValue) {
-                alert('Пожалуйста, введите токен!');
-                return;
-            }
+                    // Считываем параметры из адресной строки
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const chatId = urlParams.get('chat_id');
+                    const tokenValue = document.getElementById('token').value.trim();
 
-            if (!chatId) {
-                alert('Ошибка: ID чата не найден в ссылке.');
-                return;
-            }
+                    if (!tokenValue) {
+                        alert('⚠️ Пожалуйста, вставьте ваш Guild токен!');
+                        return;
+                    }
 
-            // Формируем объект данных для отправки обратно в бота
-            const dataToSend = {
-                type: "guild",
-                chat_id: chatId,
-                token: tokenValue
-            };
+                    if (!chatId) {
+                        alert('⚠️ Критическая ошибка: в адресе страницы отсутствует параметр chat_id. Перезапустите WebApp через бота.');
+                        return;
+                    }
 
-            // Отправляем данные боту (хэндлер dp.message(F.web_app_data) их поймает)
-            tg.sendData(JSON.stringify(dataToSend));
+                    // Формируем JSON структуру
+                    const dataToSend = {
+                        type: "guild",
+                        chat_id: chatId,
+                        token: tokenValue
+                    };
 
-            // Закрываем WebApp веб-страницу
-            tg.close();
-        });
+                    // Отправляем обратно в Python-код бота
+                    tg.sendData(JSON.stringify(dataToSend));
+
+                    // Закрываем шторку WebApp
+                    tg.close();
+
+                } catch (clickError) {
+                    alert('Ошибка при выполнении отправки: ' + clickError.message);
+                }
+            });
+
+        } catch (initError) {
+            alert('Критическая ошибка инициализации: ' + initError.message);
+        }
     </script>
 </body>
 </html>
