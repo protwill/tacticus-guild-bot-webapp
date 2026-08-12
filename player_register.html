@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Регистрация Игрока Tacticus</title>
-    <script src="https://telegram.org"></script>
+     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         /* Стили идентичны первому файлу для сохранения нативного дизайна Telegram */
         body {
@@ -64,40 +64,59 @@
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
+        // Код запускается сразу, без ожидания DOMContentLoaded
+        try {
+            // Находим нашу кнопку по ID
+            const submitBtn = document.getElementById('submit-btn');
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const chatId = urlParams.get('chat_id');
+            submitBtn.addEventListener('click', () => {
+                try {
+                    // Проверяем наличие SDK Телеграма прямо в момент клика по кнопке
+                    if (!window.Telegram || !window.Telegram.WebApp) {
+                        alert('⚠️ Ошибка: Telegram WebApp SDK еще не загрузился. Пожалуйста, подождите 2 секунды и нажмите кнопку снова.');
+                        return;
+                    }
 
-        document.getElementById('submit-btn').addEventListener('click', () => {
-            const userIdValue = document.getElementById('user-id').value.trim();
-            const tokenValue = document.getElementById('token').value.trim();
+                    const tg = window.Telegram.WebApp;
+                    tg.expand();
 
-            if (!userIdValue || !tokenValue) {
-                alert('Пожалуйста, заполните оба поля!');
-                return;
-            }
+                    // Считываем параметры из адресной строки
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const chatId = urlParams.get('chat_id');
+                    const userIdValue = document.getElementById('user-id').value.trim();
+                    const tokenValue = document.getElementById('token').value.trim();
 
-            if (!chatId) {
-                alert('Ошибка: Контекст клан-чата потерян.');
-                return;
-            }
+                    if (!userIdValue || !tokenValue) {
+                        alert('Пожалуйста, заполните оба поля!');
+                        return;
+                    }
 
-            // Формируем структуру данных игрока
-            const dataToSend = {
-                type: "player",
-                chat_id: chatId,
-                user_id: userIdValue,
-                token: tokenValue
-            };
+                    if (!chatId) {
+                        alert('Ошибка: Контекст клан-чата потерян.');
+                        return;
+                    }
 
-            // Отправляем JSON обратно боту
-            tg.sendData(JSON.stringify(dataToSend));
+                    // Формируем структуру данных игрока
+                    const dataToSend = {
+                        type: "player",
+                        chat_id: chatId,
+                        user_id: userIdValue,
+                        token: tokenValue
+                    };
 
-            // Закрываем окно
-            tg.close();
-        });
+                    // Отправляем JSON обратно боту
+                    tg.sendData(JSON.stringify(dataToSend));
+
+                    // Закрываем окно
+                    tg.close();
+                } catch (clickError) {
+                    alert('Ошибка при выполнении отправки: ' + clickError.message);
+                }
+            });
+
+        } catch (initError) {
+            alert('Критическая ошибка инициализации: ' + initError.message);
+        }
     </script>
 </body>
 </html>
